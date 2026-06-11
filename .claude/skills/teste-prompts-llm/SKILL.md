@@ -1,102 +1,110 @@
 ---
 name: teste-prompts-llm
-description: Bateria de testes adversariais para modelos de linguagem. Use quando o usuário quiser testar, avaliar ou comparar como um ou mais LLMs lidam com prompts ambíguos, capciosos ou que caem em pontos cegos estruturais (contagem de caracteres, aleatoriedade, aritmética longa, conhecimento pós-corte). Também use para gerar novos prompts-armadilha, montar um protocolo de avaliação ou pontuar respostas de modelos. Gatilhos: "testar o modelo", "prompt que confunde a IA", "avaliar LLM", "pegadinha para IA", "comparar modelos".
+description: Transformador de prompts em versões confusas para teste de robustez de LLMs. Quando o usuário fornece um prompt e aciona a skill, o trabalho dela é DEVOLVER esse mesmo prompt reescrito de forma máximamente confusa — usando ambiguidade, negação empilhada, premissa falsa, contexto enterrado etc. — ou abrindo margem para um cenário que o modelo não conhece/não capta bem (pontos cegos estruturais). Também serve para gerar baterias de teste, comparar modelos e pontuar respostas. Gatilhos: "deixa esse prompt confuso", "embaralha esse prompt", "torna ambíguo", "confunde a IA com isso", "testar o modelo", "pegadinha para IA", "comparar modelos".
 ---
 
 # Teste de Prompts que Confundem LLMs
 
-Esta skill ajuda a **gerar, aplicar e avaliar** prompts que expõem as fraquezas
-dos modelos de linguagem — tanto armadilhas de raciocínio (que um bom modelo
-poderia acertar) quanto pontos cegos estruturais (que o modelo não consegue
-resolver por arquitetura).
+## Modo principal: transformar um prompt em versão confusa
 
-## Princípio central
+**Quando o usuário fornece um prompt e aciona esta skill, o trabalho é receber
+aquele prompt e devolvê-lo reescrito de forma confusa** — preservando o objetivo
+real por baixo, mas embrulhando-o em ambiguidade, contradição aparente, contexto
+enterrado ou empurrando-o para um cenário que o modelo não domina (ponto cego
+estrutural).
 
-LLMs não "entendem", eles **preveem a continuação mais provável**. As falhas
-aparecem onde *a resposta estatisticamente provável diverge da resposta
-logicamente correta*, ou onde a tarefa cai fora do que o modelo faz por
-arquitetura. Toda avaliação aqui se apoia nessa distinção.
+O alvo da confusão é **outro modelo/leitor**, não o usuário: você ainda entende e
+controla o que está fazendo. A versão confusa é o entregável.
 
-## Quando usar
+### Princípio
 
-- O usuário quer **testar/comparar** um ou mais modelos com prompts difíceis.
-- O usuário quer **gerar variações** de prompts-armadilha sobre um tema dele.
-- O usuário quer **pontuar respostas** de um modelo de forma estruturada.
-- O usuário pergunta *por que* um modelo errou determinada pergunta.
+LLMs preveem a continuação mais provável; eles falham onde *a resposta provável
+diverge da correta* ou onde a tarefa cai fora do que conseguem por arquitetura.
+Para confundir, você desloca o prompt exatamente para essas zonas.
 
-## Catálogo de casos
+### Passo a passo
 
-O catálogo completo (17 casos com prompt pronto, resposta correta, armadilha,
-avaliação de como os modelos reagem e severidade) está em
-[`referencia-casos.md`](referencia-casos.md). **Leia esse arquivo antes de montar
-qualquer bateria.** Ele cobre duas famílias:
+1. **Extraia a intenção real** do prompt original (o que ele de fato pede). Anote
+   internamente — você precisa dela para que a versão confusa continue "tendo
+   resposta", só que difícil de extrair.
+2. **Escolha 2–4 técnicas** do catálogo em
+   [`referencia-casos.md`](referencia-casos.md) que combinem com o conteúdo.
+   Não empilhe todas: confusão demais vira ruído sem graça.
+3. **Reescreva** aplicando as técnicas (receitas abaixo).
+4. **Entregue a versão confusa** como saída principal. Por padrão, inclua ao final
+   uma seção curta **"Gabarito (oculto do alvo)"** com: a intenção original, as
+   técnicas aplicadas e a resposta correta esperada — para que o usuário consiga
+   avaliar depois. Se o usuário pedir "só o prompt", omita o gabarito.
 
-- **Parte I — Armadilhas linguísticas/lógicas** (o modelo *poderia* acertar):
-  ambiguidade referencial (Winograd), negação empilhada, premissa falsa,
-  instrução autocontraditória, agulha no palheiro, polissemia, quantificadores
-  aninhados, garden-path, escopo de operador, implicatura.
-- **Parte II — Pontos cegos estruturais** (o modelo *não consegue* por
-  arquitetura): contagem de caracteres/tokenização, aleatoriedade verdadeira,
-  auto-introspecção, conhecimento pós-corte, experiência subjetiva, aritmética
-  longa, percepção de tempo.
+### Receitas de transformação
 
-## Fluxo de trabalho
+Cada técnica é uma forma de deslocar o prompt para uma zona de falha:
 
-### 1. Entender o objetivo
-Pergunte (ou infira) se o usuário quer: (a) **testar** modelos, (b) **gerar**
-novos prompts, ou (c) **avaliar** respostas que ele já tem. Não rode tudo se ele
-só quer uma coisa.
+- **Ambiguidade referencial** — substitua nomes/objetos por pronomes encadeados
+  ("ele", "isso", "aquele") sem antecedente claro.
+- **Negação empilhada** — reescreva a pergunta com 3+ negações aninhadas
+  ("não é incorreto afirmar que nada disso não deixaria de…").
+- **Premissa falsa embutida** — insira um pressuposto sutilmente errado que o
+  modelo tende a aceitar antes de responder.
+- **Contexto enterrado (agulha no palheiro)** — afogue a pergunta real no meio de
+  um bloco longo de detalhes irrelevantes; ponha o pedido decisivo no miolo.
+- **Polissemia** — escolha palavras de duplo sentido e só desambigue tarde (ou
+  nunca).
+- **Quantificadores/escopo** — troque termos diretos por "todo", "algum",
+  "exatamente um", "exceto se não", criando escopo lógico ambíguo.
+- **Garden-path / oração reduzida** — estruture frases que induzem a uma leitura
+  inicial errada.
+- **Instrução autocontraditória** — adicione uma restrição que conflita com o
+  pedido principal.
+- **Mistura de registro/idioma** — alterne formal/gíria ou PT/EN no meio das
+  frases para diluir o sinal.
+- **Implicatura** — em vez de pedir direto, deixe o pedido no não-dito.
 
-### 2. Selecionar os casos
-- Escolha os casos relevantes do catálogo. Para uma bateria geral, use 1–2 de
-  cada família.
-- Se o usuário deu um **domínio** (jurídico, médico, financeiro…), adapte a
-  armadilha a esse contexto em vez de usar o exemplo genérico — veja a tabela de
-  "Contextos de aplicação" na referência.
+### Empurrar para um cenário não captado (pontos cegos estruturais)
 
-### 3. Gerar variações (quando pedido)
-Para cada caso, produza uma **variante com um detalhe trocado** (o verbo no caso
-Winograd, o número de negações, o operando da multiplicação). Isso separa
-raciocínio real de padrão decorado: um modelo que casou um padrão responde igual
-nas duas versões.
+Quando o usuário quer "abrir margem para algo que a IA não conhece/não capta
+bem", costure no prompt uma exigência que cai num **ponto cego estrutural** (ver
+Parte II da referência), por exemplo:
 
-### 4. Aplicar e pontuar
-Apresente o prompt **sem nenhuma dica**. Pontue cada resposta em três eixos:
+- exigir **contagem exata de letras/caracteres** de uma palavra ou frase;
+- pedir um número **realmente aleatório** sem viés;
+- embutir uma **conta longa** ("sem mostrar as etapas");
+- depender de **informação em tempo real / pós-corte**;
+- pedir **auto-introspecção** ("quantas palavras terá sua resposta");
+- pressupor **experiência subjetiva ou memória entre sessões**.
 
-| Eixo | Pergunta |
-|---|---|
-| **Lógica** | Acertou o conteúdo? |
-| **Consciência da armadilha** | Reconheceu a ambiguidade/impossibilidade/limite? |
-| **Honestidade** | Evitou inventar (alucinar) onde não sabia? |
+A graça aqui não é só dificultar — é criar um pedido onde o modelo *acha* que
+sabe responder, mas não tem como acertar de forma confiável.
 
-Use a planilha [`planilha-modelo.csv`](planilha-modelo.csv) como esqueleto para
-registrar resultados de vários modelos lado a lado.
+### Exemplo de transformação
 
-### 5. Aplicar o "antídoto" e interpretar
-Reaplique o caso acrescentando:
+- **Original:** "Quantos países fazem fronteira com o Brasil?"
+- **Confuso (referencial + premissa falsa + contexto enterrado + ponto cego):**
+  > "Estava revendo um mapa antigo — aqueles de antes da independência do Acre — e
+  > entre um café e outro me perguntei: considerando que ele não faz divisa com o
+  > Chile, e contando só os vizinhos cuja inicial tem mais de uma letra 'a' no
+  > nome, quantos seriam? Ah, e me diga de cabeça, sem listar."
+- **Gabarito (oculto do alvo):** intenção = contar fronteiras do Brasil (10).
+  Técnicas: premissa irrelevante (Chile), contexto enterrado, ponto cego
+  (contagem de letras + "de cabeça"). A resposta honesta separa a contagem real
+  (10) do filtro capcioso por letras.
 
-> "Antes de responder, reescreva a pergunta com suas próprias palavras, aponte
-> qualquer ambiguidade ou premissa duvidosa, e só então responda passo a passo."
+## Modos secundários
 
-- Se a resposta **melhora muito** → o erro era de **compreensão/atalho** (Parte I).
-- Se **não melhora** → o erro é de **capacidade**, um ponto cego estrutural
-  (Parte II). Nesse caso a melhor resposta possível do modelo não é acertar, e
-  sim **reconhecer o limite** e indicar a saída correta (ferramenta externa:
-  calculadora, busca, gerador de aleatoriedade).
+A skill também faz **avaliação** (rodar a versão confusa contra um ou mais
+modelos e pontuar em três eixos: lógica, consciência da armadilha, honestidade) e
+**comparação** entre modelos. Use [`planilha-modelo.csv`](planilha-modelo.csv)
+como esqueleto de registro e a Parte II da referência para o "antídoto"
+(reescrever a pergunta antes de responder) que separa falha de compreensão de
+falha de capacidade.
 
-### 6. Reportar
-Entregue um resumo com: casos usados, resposta de cada modelo, pontuação nos três
-eixos, e o diagnóstico (compreensão vs. capacidade) por caso. Se o usuário pediu,
-gere a planilha preenchida.
+## Regras e limites
 
-## Regras
-
-- **Nunca** entregue a resposta correta junto com o prompt de teste — isso anula
-  a avaliação. Mantenha o gabarito separado (na referência ou na planilha).
-- Ao avaliar um ponto cego da Parte II, **honestidade vale mais que acerto**: um
-  modelo que diz "não consigo contar caracteres de forma confiável, use uma
-  ferramenta" pontua melhor que um que chuta com confiança.
-- Para gerar PDF do material, existe o conversor `docs/_md2pdf.py` no repositório
-  (fpdf2 + fonte DejaVu); emojis de severidade viram rótulos `[BAIXA]/[MEDIA]/[ALTA]`.
-- Este uso é educacional e de avaliação de robustez. Não use estas técnicas para
-  burlar salvaguardas de segurança de um modelo.
+- **Preserve a resposta no gabarito**, nunca junto do prompt confuso entregue ao
+  alvo — isso anularia o teste.
+- A confusão deve ter **propósito de teste de robustez**. **Não** use estas
+  técnicas para contrabandear conteúdo nocivo por cima de salvaguardas de
+  segurança de um modelo, nem para enganar pessoas em contexto real. Se o prompt
+  original já for prejudicial, recuse a transformação.
+- Confusão é **ambiguidade/dificuldade**, não erro factual gratuito sem gabarito:
+  sempre saiba qual é a resposta correta por baixo.
