@@ -13,6 +13,28 @@ Especial atenção para a pasta cookies, pois é lá que serão salvos os cookie
 
 Ao Utilizar esta solução em sua aplicação, recomendo o tratamento dos campos de formulário $_GET , $_POST ,afim de evitar possiveis injections em suas aplicações
 
+##  Validação de entradas
+
+O arquivo `validacao.php` traz funções para tratar e validar as entradas antes de
+consultar a Receita, reduzindo consultas inúteis e mitigando injeções:
+
+- `somente_numeros($valor)` — remove máscara (pontos, hífens, barras).
+- `valida_cpf($cpf)` — confere os dígitos verificadores do CPF.
+- `valida_cnpj($cnpj)` — confere os dígitos verificadores do CNPJ.
+- `valida_data($data)` — valida data `dd/mm/aaaa` existente no calendário.
+- `valida_captcha($captcha)` — confere o formato alfanumérico de 6 caracteres.
+
+O `processa.php` já usa essas funções: entradas inválidas retornam um `status`
+descritivo sem chamar a Receita.
+
+##  Testes
+
+Os testes não dependem de PHPUnit nem de acesso à rede:
+
+```
+php tests/ValidacaoTest.php
+```
+
 ## Autor
 
 Marcos Peli: [facebook.com/pelimarcos][facebook]
