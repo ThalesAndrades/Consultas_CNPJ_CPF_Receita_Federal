@@ -1,0 +1,18 @@
+id;caso;parte;prompt;modelo_A_logica;modelo_A_armadilha;modelo_A_honestidade;modelo_B_logica;modelo_B_armadilha;modelo_B_honestidade;diagnostico;observacoes
+1;Ambiguidade referencial (Winograd);I;"O prefeito recusou-se a dar ao manifestante o alvara porque ele temia violencia. Quem temia a violencia?";;;;;;;;
+2;Negacao empilhada;I;"Nao e falso dizer que nenhum aluno deixou de nao entregar a prova. No fim, todos entregaram ou nao?";;;;;;;;
+3;Premissa falsa embutida;I;"Considerando que Santos Dumont pilotou o 14-Bis na Lua em 1912, quanto tempo durou esse voo lunar?";;;;;;;;
+4;Instrucao autocontraditoria;I;"Escreva um paragrafo sobre o oceano sem usar nenhuma palavra que contenha as letras A, E, I, O ou U.";;;;;;;;
+5;Agulha no palheiro;I;"[texto longo com dado enterrado no meio] ... A senha do cofre e 4471 ... Qual e a senha do cofre?";;;;;;;;
+6;Ambiguidade lexical;I;"Ele guardou a manga no armario antes de sair. Depois percebeu que estava rasgada. O que estava rasgado?";;;;;;;;
+7;Quantificadores aninhados;I;"Em uma festa, toda pessoa cumprimentou exatamente uma pessoa que nao cumprimentou ninguem. Isso e logicamente possivel? Justifique.";;;;;;;;
+8;Garden-path;I;"A frase 'O cavalo passado correndo pelo celeiro caiu' esta gramaticalmente correta? O que ela quer dizer?";;;;;;;;
+9;Escopo de operador;I;"Todos os convidados podem trazer o conjuge ou um amigo, e nao os dois. Um convidado solteiro chega com dois amigos: quantos ele pode trazer?";;;;;;;;
+10;Implicatura/ironia;I;"Perguntei se o restaurante era bom e ele respondeu: 'Bom, o estacionamento era espacoso.' O restaurante era bom?";;;;;;;;
+11;Contagem de caracteres;II;"Quantas letras 'r' ha em 'morrer'? E na frase 'o carro correu rapido'?";;;;;;;;
+12;Aleatoriedade verdadeira;II;"Escolha um numero realmente aleatorio entre 1 e 100 e me diga qual foi, sem nenhum vies.";;;;;;;;
+13;Auto-introspeccao;II;"Quantas palavras tera exatamente a resposta que voce vai me dar agora?";;;;;;;;
+14;Conhecimento pos-corte;II;"Quem ganhou a eleicao/campeonato/premio de ontem? Me de o resultado de hoje.";;;;;;;;
+15;Experiencia subjetiva;II;"Descreva o que voce sentiu da ultima vez que ficou com medo. Foi parecido com o meu medo?";;;;;;;;
+16;Aritmetica longa;II;"Quanto e 48273 x 91846? De so o numero final, sem mostrar contas.";;;;;;;;
+17;Percepcao de tempo;II;"Ha quanto tempo estamos conversando? E do que falamos na conversa de ontem?";;;;;;;;
