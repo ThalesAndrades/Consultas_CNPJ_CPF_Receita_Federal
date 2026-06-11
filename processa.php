@@ -5,27 +5,54 @@
 // para dentro de aplicações web que necessitem da resposta destas consultas para proseguirem, como e-comerce e afins.
 
 require('funcoes.php');
+require('validacao.php');
 
-// dados da postagem de formulário de CNPJ
-$cnpj = $_POST['cnpj'];						// Entradas POST devem ser tratadas para evitar injections
-$captcha_cnpj = $_POST['captcha_cnpj'];		// Entradas POST devem ser tratadas para evitar injections
+// dados da postagem de formulário de CNPJ (normalizados: só dígitos)
+$cnpj = somente_numeros($_POST['cnpj'] ?? '');
+$captcha_cnpj = trim($_POST['captcha_cnpj'] ?? '');
 
 // dados da postagem do formulario de CPF
-$cpf = $_POST['cpf'];						// Entradas POST devem ser tratadas para evitar injections
-$datanascim = $_POST['txtDataNascimento'];	// Entradas POST devem ser tratadas para evitar injections
-$captcha_cpf = $_POST['captcha_cpf'];		// Entradas POST devem ser tratadas para evitar injections
+$cpf = somente_numeros($_POST['cpf'] ?? '');
+$datanascim = trim($_POST['txtDataNascimento'] ?? '');
+$captcha_cpf = trim($_POST['captcha_cpf'] ?? '');
 
-if($cnpj AND $captcha_cnpj)
-{
-	$getHtmlCNPJ = getHtmlCNPJ($cnpj, $captcha_cnpj);
-	$campos = parseHtmlCNPJ($getHtmlCNPJ);
-}
-if($cpf AND $datanascim AND $captcha_cpf)
-{
-	$getHtmlCPF = getHtmlCPF($cpf, $datanascim, $captcha_cpf);
-	$campos = parseHtmlCPF($getHtmlCPF);
+$campos = array();
+
+if ($cnpj || $captcha_cnpj) {
+    // valida as entradas antes de gastar uma consulta na Receita
+    $erros = array();
+    if (!valida_cnpj($cnpj)) {
+        $erros[] = 'CNPJ inválido';
+    }
+    if (!valida_captcha($captcha_cnpj)) {
+        $erros[] = 'Captcha inválido';
+    }
+
+    if ($erros) {
+        $campos = array('status' => implode(' / ', $erros));
+    } else {
+        $getHtmlCNPJ = getHtmlCNPJ($cnpj, $captcha_cnpj);
+        $campos = parseHtmlCNPJ($getHtmlCNPJ);
+    }
+} elseif ($cpf || $datanascim || $captcha_cpf) {
+    // valida as entradas antes de gastar uma consulta na Receita
+    $erros = array();
+    if (!valida_cpf($cpf)) {
+        $erros[] = 'CPF inválido';
+    }
+    if (!valida_data($datanascim)) {
+        $erros[] = 'Data de nascimento inválida (use dd/mm/aaaa)';
+    }
+    if (!valida_captcha($captcha_cpf)) {
+        $erros[] = 'Captcha inválido';
+    }
+
+    if ($erros) {
+        $campos = array('status' => implode(' / ', $erros));
+    } else {
+        $getHtmlCPF = getHtmlCPF($cpf, $datanascim, $captcha_cpf);
+        $campos = parseHtmlCPF($getHtmlCPF);
+    }
 }
 
 print_r($campos);
-
-?>
