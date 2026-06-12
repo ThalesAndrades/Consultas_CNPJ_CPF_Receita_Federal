@@ -33,6 +33,12 @@ raspavam as páginas da Receita protegidas por captcha. Testando os endpoints ho
     php consulta_cpf_serpro.php --lote cpfs.txt
   ```
 
+- **`consulta_serasa.php`** — cliente base da API B2B do **Serasa Experian** (consulta de
+  crédito de terceiros: Score 0–1000 e Relatórios PJ/PF). Camada de autenticação
+  (login → token) implementada; os payloads de cada produto são esqueletos marcados com
+  `AJUSTAR:` para confirmar na doc do contrato. Exige contrato Serasa Experian e base
+  legal LGPD por consulta (análise de risco/crédito) — não é consulta do próprio CPF.
+
 Detalhes do que dá e do que não dá para consultar por código em
 [`docs/COMO-CONSULTAR.md`](docs/COMO-CONSULTAR.md).
 
