@@ -1,7 +1,31 @@
 # Consultas_CNPJ_CPF_Receita_Federal
 Consulta CNPJ e CPF na Receita com Captcha
 
-##  Utilização
+## Aviso importante (2026)
+
+Os scripts originais (`index.php`, `getcaptcha.php`, `processa.php`, `funcoes.php`)
+raspavam as páginas da Receita protegidas por captcha. Testando os endpoints hoje:
+
+- **CPF**: a página `ConsultaPublicaSonoro.asp` retorna **HTTP 404** — foi desativada.
+  A consulta de situação cadastral de CPF migrou para o **gov.br autenticado** (reCAPTCHA),
+  sem endpoint público. O fluxo de CPF deste repositório **não funciona mais**.
+- **CNPJ**: o endpoint antigo redireciona (301) para um novo domínio e segue com captcha.
+
+### Alternativas modernas incluídas neste repositório
+
+- **`consulta_cnpj.php`** — consulta CNPJ via API pública (BrasilAPI), JSON, sem captcha:
+  ```bash
+  php consulta_cnpj.php 00360305000104
+  ```
+- **`valida_cpf.php`** — valida os dígitos verificadores de um CPF (offline):
+  ```bash
+  php valida_cpf.php 111.444.777-35
+  ```
+
+Detalhes do que dá e do que não dá para consultar por código em
+[`docs/COMO-CONSULTAR.md`](docs/COMO-CONSULTAR.md).
+
+##  Utilização (scripts originais — legado)
 
 ###  index.php
 
