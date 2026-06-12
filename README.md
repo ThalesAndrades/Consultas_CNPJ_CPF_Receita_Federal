@@ -22,10 +22,15 @@ raspavam as páginas da Receita protegidas por captcha. Testando os endpoints ho
   php valida_cpf.php 111.444.777-35
   ```
 - **`consulta_cpf_serpro.php`** — cliente da API oficial Serpro "Consulta CPF" (situação
-  cadastral por requisição, JSON, sem captcha). Em produção exige contrato com e-CNPJ;
-  há ambiente trial para testes:
+  cadastral por requisição, JSON, sem captcha). Pronto para produção: cache de token (1h),
+  retry com backoff, tradução das situações cadastrais e consulta em lote. Em produção
+  exige contrato com e-CNPJ; há ambiente trial para testes:
   ```bash
+  # uma consulta
   SERPRO_BEARER="<token-trial>" php consulta_cpf_serpro.php 63017285995
+  # lote (um CPF por linha)
+  SERPRO_CONSUMER_KEY=... SERPRO_CONSUMER_SECRET=... SERPRO_CPF_AMBIENTE=producao \
+    php consulta_cpf_serpro.php --lote cpfs.txt
   ```
 
 Detalhes do que dá e do que não dá para consultar por código em
