@@ -38,6 +38,9 @@ raspavam as páginas da Receita protegidas por captcha. Testando os endpoints ho
   (login → token) implementada; os payloads de cada produto são esqueletos marcados com
   `AJUSTAR:` para confirmar na doc do contrato. Exige contrato Serasa Experian e base
   legal LGPD por consulta (análise de risco/crédito) — não é consulta do próprio CPF.
+- **`exemplo_serasa.php`** — exemplo do fluxo B2B do Serasa (login → Score → Relatório).
+- **`docs/REGISTRO-FINALIDADE-LGPD.md`** — modelo para registrar a base legal das consultas
+  de crédito a terceiros (finalidade, base legal, retenção, log de auditoria).
 
 Detalhes do que dá e do que não dá para consultar por código em
 [`docs/COMO-CONSULTAR.md`](docs/COMO-CONSULTAR.md).
