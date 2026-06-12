@@ -50,8 +50,8 @@ function validaCPF($cpf)
     return true;
 }
 
-// Execução direta via linha de comando.
-if (PHP_SAPI === 'cli' && isset($argv[1])) {
+// Execução direta via linha de comando (não dispara quando o arquivo é incluído via require).
+if (PHP_SAPI === 'cli' && isset($argv[1]) && realpath($argv[0] ?? '') === __FILE__) {
     $cpf = $argv[1];
     if (validaCPF($cpf)) {
         echo "CPF $cpf: válido (dígitos verificadores conferem)\n";

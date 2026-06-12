@@ -125,8 +125,8 @@ function consultaCpfSerpro($cpf, $consumerKey = null, $consumerSecret = null, $a
     return ['status' => 'Retorno inesperado: ' . $msg, 'http' => $code, 'dados' => $dados];
 }
 
-// Execução direta via linha de comando.
-if (PHP_SAPI === 'cli' && isset($argv[1])) {
+// Execução direta via linha de comando (não dispara quando o arquivo é incluído via require).
+if (PHP_SAPI === 'cli' && isset($argv[1]) && realpath($argv[0] ?? '') === __FILE__) {
     $r = consultaCpfSerpro($argv[1]);
     if ($r['status'] !== 'OK') {
         fwrite(STDERR, "Erro: {$r['status']}\n");
