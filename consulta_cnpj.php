@@ -55,7 +55,7 @@ function consultaCNPJ($cnpj)
 }
 
 // Execução direta via linha de comando (não dispara quando o arquivo é incluído via require).
-if (PHP_SAPI === 'cli' && isset($argv[1]) && realpath($argv[0] ?? '') === __FILE__) {
+if (PHP_SAPI === 'cli' && isset($argv[1]) && realpath($argv[0] ?? '') === realpath(__FILE__)) {
     $resultado = consultaCNPJ($argv[1]);
 
     if ($resultado['status'] !== 'OK') {

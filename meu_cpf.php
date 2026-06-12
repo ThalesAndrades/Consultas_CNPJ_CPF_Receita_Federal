@@ -29,7 +29,7 @@ function validaDataNascimentoMeuCpf($data)
     return checkdate((int) $mes, (int) $dia, (int) $ano) && (int) $ano >= 1900;
 }
 
-if (PHP_SAPI === 'cli' && realpath($argv[0] ?? '') === __FILE__) {
+if (PHP_SAPI === 'cli' && realpath($argv[0] ?? '') === realpath(__FILE__)) {
     if (!validaCPF(MEU_CPF)) {
         fwrite(STDERR, "CPF configurado é inválido: " . MEU_CPF . "\n");
         exit(1);

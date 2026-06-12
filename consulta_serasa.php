@@ -62,7 +62,7 @@ function serasaRequestComRetry(callable $configura, $maxTentativas)
             return ['resp' => $resp, 'code' => $code, 'err' => $err];
         }
         sleep($espera);
-        $espera *= 2;
+        $espera = min($espera * 2, 60); // teto de 60s para o backoff
     }
 }
 

@@ -133,7 +133,7 @@ function serproRequestComRetry(callable $configura, $maxTentativas)
             return ['resp' => $resp, 'code' => $code, 'err' => $err];
         }
         sleep($espera);
-        $espera *= 2;
+        $espera = min($espera * 2, 60); // teto de 60s para o backoff
     }
 }
 
@@ -308,7 +308,7 @@ function consultaCpfSerproLote(array $cpfs, $pausaSegundos = 0.5)
 }
 
 // Execução direta via linha de comando (não dispara quando incluído via require).
-if (PHP_SAPI === 'cli' && isset($argv[1]) && realpath($argv[0] ?? '') === __FILE__) {
+if (PHP_SAPI === 'cli' && isset($argv[1]) && realpath($argv[0] ?? '') === realpath(__FILE__)) {
     if ($argv[1] === '--lote') {
         $arquivo = $argv[2] ?? '';
         if (!is_file($arquivo)) {

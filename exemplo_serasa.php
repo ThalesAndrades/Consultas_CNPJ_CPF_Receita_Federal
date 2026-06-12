@@ -14,7 +14,7 @@
 
 require_once __DIR__ . '/consulta_serasa.php';
 
-if (PHP_SAPI !== 'cli' || realpath($argv[0] ?? '') !== __FILE__) {
+if (PHP_SAPI !== 'cli' || realpath($argv[0] ?? '') !== realpath(__FILE__)) {
     return;
 }
 

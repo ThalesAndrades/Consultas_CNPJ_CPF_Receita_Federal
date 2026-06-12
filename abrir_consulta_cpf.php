@@ -33,7 +33,7 @@ function validaDataNascimento($data)
     return checkdate((int) $mes, (int) $dia, (int) $ano) && (int) $ano >= 1900;
 }
 
-if (PHP_SAPI === 'cli' && realpath($argv[0] ?? '') === __FILE__) {
+if (PHP_SAPI === 'cli' && realpath($argv[0] ?? '') === realpath(__FILE__)) {
     $cpf  = $argv[1] ?? '';
     $nasc = $argv[2] ?? '';
 
