@@ -12,11 +12,13 @@
 // Uso: php meu_cpf.php <dd/mm/aaaa>
 //      (a data de nascimento não fica gravada no arquivo; você informa na hora)
 
-require __DIR__ . '/valida_cpf.php';
+require_once __DIR__ . '/valida_cpf.php';
 
 const MEU_CPF = '050.341.539-12';
-const URL_CONSULTA_PUBLICA =
-    'https://servicos.receita.fazenda.gov.br/servicos/cpf/consultasituacao/consultapublica.asp';
+if (!defined('URL_CONSULTA_PUBLICA')) {
+    define('URL_CONSULTA_PUBLICA',
+        'https://servicos.receita.fazenda.gov.br/servicos/cpf/consultasituacao/consultapublica.asp');
+}
 
 function validaDataNascimentoMeuCpf($data)
 {
@@ -27,7 +29,7 @@ function validaDataNascimentoMeuCpf($data)
     return checkdate((int) $mes, (int) $dia, (int) $ano) && (int) $ano >= 1900;
 }
 
-if (PHP_SAPI === 'cli') {
+if (PHP_SAPI === 'cli' && realpath($argv[0] ?? '') === __FILE__) {
     if (!validaCPF(MEU_CPF)) {
         fwrite(STDERR, "CPF configurado é inválido: " . MEU_CPF . "\n");
         exit(1);

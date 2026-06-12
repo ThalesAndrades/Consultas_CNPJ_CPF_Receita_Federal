@@ -79,6 +79,17 @@ function serproTokenDoCache($consumerKey, $ambiente)
 }
 
 /**
+ * Apaga o cache do token (usado quando o token é rejeitado antes de expirar).
+ */
+function serproApagaCacheToken($consumerKey, $ambiente)
+{
+    $arquivo = serproCaminhoCacheToken($consumerKey, $ambiente);
+    if (is_file($arquivo)) {
+        @unlink($arquivo);
+    }
+}
+
+/**
  * Grava o token no cache com permissão restrita (0600).
  */
 function serproGravaCacheToken($consumerKey, $ambiente, $accessToken, $expiresIn)
@@ -164,25 +175,28 @@ function serproObterToken($consumerKey, $consumerSecret, $maxTentativas = 3)
  *
  * @return array ['status' => 'OK', 'access_token' => string] ou ['status' => erro]
  */
-function serproResolveToken($consumerKey, $consumerSecret, $ambiente, $maxTentativas)
+function serproResolveToken($consumerKey, $consumerSecret, $ambiente, $maxTentativas, $forcarNovo = false)
 {
     $bearer = getenv('SERPRO_BEARER');
     if ($bearer) {
-        return ['status' => 'OK', 'access_token' => $bearer];
+        // Bearer fixo (trial): não há como renovar; sinaliza para não tentar refresh.
+        return ['status' => 'OK', 'access_token' => $bearer, 'renovavel' => false];
     }
     if (!$consumerKey || !$consumerSecret) {
         return ['status' => 'Defina SERPRO_CONSUMER_KEY e SERPRO_CONSUMER_SECRET (contrato Serpro), ou SERPRO_BEARER para testar o trial'];
     }
-    $cache = serproTokenDoCache($consumerKey, $ambiente);
-    if ($cache !== null) {
-        return ['status' => 'OK', 'access_token' => $cache];
+    if (!$forcarNovo) {
+        $cache = serproTokenDoCache($consumerKey, $ambiente);
+        if ($cache !== null) {
+            return ['status' => 'OK', 'access_token' => $cache, 'renovavel' => true, 'do_cache' => true];
+        }
     }
     $token = serproObterToken($consumerKey, $consumerSecret, $maxTentativas);
     if ($token['status'] !== 'OK') {
         return $token;
     }
     serproGravaCacheToken($consumerKey, $ambiente, $token['access_token'], $token['expires_in']);
-    return ['status' => 'OK', 'access_token' => $token['access_token']];
+    return ['status' => 'OK', 'access_token' => $token['access_token'], 'renovavel' => true, 'do_cache' => false];
 }
 
 /**
@@ -204,22 +218,26 @@ function consultaCpfSerpro($cpf, $consumerKey = null, $consumerSecret = null, $a
         return ['status' => 'CPF deve ter 11 dígitos'];
     }
 
+    $path = $ambiente === 'producao' ? SERPRO_CPF_PATH_PRODUCAO : SERPRO_CPF_PATH_TRIAL;
+    $url  = SERPRO_GATEWAY . $path . $cpf;
+
     $token = serproResolveToken($consumerKey, $consumerSecret, $ambiente, $maxTentativas);
     if ($token['status'] !== 'OK') {
         return $token;
     }
 
-    $path = $ambiente === 'producao' ? SERPRO_CPF_PATH_PRODUCAO : SERPRO_CPF_PATH_TRIAL;
-    $url  = SERPRO_GATEWAY . $path . $cpf;
+    $r = serproGetCpf($url, $token['access_token'], $maxTentativas);
 
-    $r = serproRequestComRetry(function ($ch) use ($url, $token) {
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HTTPGET, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Accept: application/json',
-            'Authorization: Bearer ' . $token['access_token'],
-        ]);
-    }, $maxTentativas);
+    // Token do cache rejeitado antes de expirar (revogado/rotacionado): limpa o cache e
+    // tenta UMA vez com token novo. Só faz sentido se o token for renovável (não é Bearer fixo).
+    if (in_array($r['code'], [401, 403], true) && !empty($token['renovavel']) && !empty($token['do_cache'])) {
+        serproApagaCacheToken($consumerKey, $ambiente);
+        $token = serproResolveToken($consumerKey, $consumerSecret, $ambiente, $maxTentativas, true);
+        if ($token['status'] !== 'OK') {
+            return $token;
+        }
+        $r = serproGetCpf($url, $token['access_token'], $maxTentativas);
+    }
 
     if ($r['resp'] === false) {
         return ['status' => 'Falha de conexão na consulta: ' . $r['err']];
@@ -241,13 +259,30 @@ function consultaCpfSerpro($cpf, $consumerKey = null, $consumerSecret = null, $a
         return ['status' => 'CPF não encontrado na base'];
     }
     if ($code === 401 || $code === 403) {
-        return ['status' => 'Não autorizado (HTTP ' . $code . '). Token expirado/sem permissão — limpe o cache e tente de novo.'];
+        return ['status' => 'Não autorizado (HTTP ' . $code . '). Token sem permissão ou credenciais inválidas.'];
     }
     if ($code === 429) {
         return ['status' => 'Limite de requisições excedido (HTTP 429) após retries. Reduza o ritmo.'];
     }
     $msg = is_array($dados) && isset($dados['mensagem']) ? $dados['mensagem'] : 'HTTP ' . $code;
     return ['status' => 'Retorno inesperado: ' . $msg, 'http' => $code, 'dados' => $dados];
+}
+
+/**
+ * Faz o GET de consulta de CPF com um token, devolvendo o resultado cru (com retry).
+ *
+ * @return array ['resp' => string|false, 'code' => int, 'err' => string]
+ */
+function serproGetCpf($url, $accessToken, $maxTentativas)
+{
+    return serproRequestComRetry(function ($ch) use ($url, $accessToken) {
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HTTPGET, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Accept: application/json',
+            'Authorization: Bearer ' . $accessToken,
+        ]);
+    }, $maxTentativas);
 }
 
 /**

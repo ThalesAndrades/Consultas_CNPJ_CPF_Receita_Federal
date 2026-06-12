@@ -14,10 +14,12 @@
 //
 // Uso: php abrir_consulta_cpf.php 111.444.777-35 25/12/1990
 
-require __DIR__ . '/valida_cpf.php';
+require_once __DIR__ . '/valida_cpf.php';
 
-const URL_CONSULTA_PUBLICA =
-    'https://servicos.receita.fazenda.gov.br/servicos/cpf/consultasituacao/consultapublica.asp';
+if (!defined('URL_CONSULTA_PUBLICA')) {
+    define('URL_CONSULTA_PUBLICA',
+        'https://servicos.receita.fazenda.gov.br/servicos/cpf/consultasituacao/consultapublica.asp');
+}
 
 /**
  * Valida data no formato dd/mm/aaaa e confere se é uma data real.
@@ -31,7 +33,7 @@ function validaDataNascimento($data)
     return checkdate((int) $mes, (int) $dia, (int) $ano) && (int) $ano >= 1900;
 }
 
-if (PHP_SAPI === 'cli') {
+if (PHP_SAPI === 'cli' && realpath($argv[0] ?? '') === __FILE__) {
     $cpf  = $argv[1] ?? '';
     $nasc = $argv[2] ?? '';
 
