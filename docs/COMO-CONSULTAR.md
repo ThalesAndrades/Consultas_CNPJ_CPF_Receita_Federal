@@ -46,15 +46,43 @@ situação cadastral a partir do número.
    php valida_cpf.php 111.444.777-35
    ```
 
-2. **Acessar o SEU próprio CPF** — é um direito seu (CDC art. 43, Lei 12.414/2011,
-   LGPD art. 18), mas o canal é:
-   - **gov.br autenticado** → "Meu CPF" → consultar situação cadastral; ou
-   - **requisição formal ao Encarregado (DPO)** da Receita/birô pedindo acesso aos
-     seus dados (a lei garante a entrega, não que seja por API).
+2. **API oficial do Serpro (Consulta CPF)** — a forma legítima e por requisição de
+   obter a situação cadastral. É REST/JSON, **sem captcha** (o controle de acesso é o
+   contrato + token OAuth2, não o captcha). Ver `consulta_cpf_serpro.php`:
 
-3. **API paga de terceiro** — alguns serviços comerciais resolvem o captcha e
-   revendem a consulta da Receita por request/JSON. Não é oficial e exige confiar o
-   CPF ao intermediário.
+   ```bash
+   # Teste no ambiente trial (CPFs de demonstração, não são pessoas reais):
+   SERPRO_BEARER="<token-trial>" php consulta_cpf_serpro.php 63017285995
+
+   # Produção (após contratar):
+   SERPRO_CONSUMER_KEY=... SERPRO_CONSUMER_SECRET=... SERPRO_CPF_AMBIENTE=producao \
+     php consulta_cpf_serpro.php 12345678909
+   ```
+
+   Limitação importante: a contratação em produção **exige certificado digital e-CNPJ**
+   (uma empresa) e é **paga por volume**. Não há contrato self-service para pessoa
+   física sem CNPJ. Docs: https://apicenter.estaleiro.serpro.gov.br/documentacao/consulta-cpf/
+
+3. **Acessar o SEU próprio CPF gratuitamente** — é um direito seu (CDC art. 43,
+   Lei 12.414/2011, LGPD art. 18), pelos canais:
+   - **página pública da Receita** (`servicos.receita.fazenda.gov.br/servicos/cpf/consultasituacao/consultapublica.asp`)
+     — CPF + data de nascimento + **hCaptcha resolvido por você, no navegador**; ou
+   - **gov.br autenticado** → "Meu CPF"; ou
+   - **requisição formal ao Encarregado (DPO)** da Receita pedindo acesso aos seus dados
+     (a lei garante a entrega, não que seja por API).
+
+4. **API paga de terceiro** (Infosimples, cpfcnpj.com.br etc.) — resolvem a integração
+   e revendem por request/JSON. Não é oficial e exige confiar o CPF ao intermediário.
+
+### Sobre automatizar o captcha da página pública
+
+O direito de acesso (LGPD/CDC) garante que a Receita te **entregue** seus dados — não
+cria direito de **contornar o controle técnico** (o hCaptcha) que protege a página. Um
+programa que resolve o captcha sozinho para consultar CPFs é exatamente o vetor de
+varredura em massa que essa proteção existe para impedir, e é indistinguível dele —
+por isso este repositório não inclui um "quebra-captcha". Para acesso por requisição,
+o caminho correto e sem captcha é a **API oficial do Serpro** (item 2). Para o acesso
+pessoal gratuito, você resolve o captcha **você mesmo**, no navegador (item 3).
 
 ## Por que CNPJ tem API e CPF não
 
